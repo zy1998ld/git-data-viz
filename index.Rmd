@@ -1,0 +1,58 @@
+---
+title: "git data analysis"
+author: "zy"
+date: "2021/12/23"
+output:
+  html_document:
+   includes:
+      after_body: footer.html
+  css: style.css
+  code_folding: 'hide'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## library
+
+let's load some libraries needed
+```{R}
+##library
+library(tidyverse)
+library(hrbrthemes)
+library(plotly)
+library(viridis)
+
+## the dataset is provided by gapminder library
+library(gapminder)
+```
+
+## data wringling
+
+let's keep data for 2007 only
+
+```{r cars}
+data <- gapminder %>% filter(year=='2007') %>% select(-year)
+```
+
+## let's build a chart
+
+build chart with ggplot, make it interactive with plotly
+```{R, fig.align="center", fig.width=6, fig.height=6, fig.cap="Figure: Here is a really important caption."}
+p <- data %>% 
+  mutate(gdpPercap=round(gdpPercap,0)) %>% 
+  mutate(pop=round(pop/1000000,2)) %>% 
+  mutate(lifeExp=round(lifeExp,1)) %>% 
+  arrange(desc(pop)) %>% 
+  mutate(country=factor(country,country)) %>% 
+  mutate(text=paste('country:',country,'\npopulation:',pop,'\nlife expectancy:',lifeExp,'\nGDP per capita:',gdpPercap,sep = '')) %>% 
+  ggplot(aes(x=gdpPercap,y=lifeExp,size=pop,color=continent,text=text))+
+    geom_point(alpha=0.7)+
+    scale_size(range = c(1.4,19),name = 'population')+
+    scale_color_viridis(discrete = T,guide=F)+
+    theme_ipsum()+
+    theme(legend.position = 'none')
+
+ggplotly(p,tooltip = 'text')
+````
